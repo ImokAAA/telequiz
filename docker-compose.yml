@@ -2,18 +2,18 @@ version: '3'
 
 services:
   redis:
-    container_name: redis
+    container_name: telequiz_redis
     image: redis:latest
     restart: always
     ports:
       - '6379:6379'
 
   postgres:
-    container_name: postgres
+    container_name: telequiz_postgres
     image: postgres:latest
     restart: always
     environment:
-      POSTGRES_DB: osint
+      POSTGRES_DB: telequizdb
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
