@@ -19,7 +19,7 @@ from routers import (
     tg
 )
 
-nrock_ip = "https://f8ea-77-245-106-179.ngrok-free.app"
+nrock_ip = "https://imangali.space"
 WEBHOOK_URL = f"{nrock_ip}/webhook"
 
 BaseModel.metadata.create_all(bind=engine)
