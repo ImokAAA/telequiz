@@ -5,7 +5,7 @@ BASE_DIR = Path(__file__).parent  # ..\osint-backend\src
 
 
 class Settings(BaseSettings):
-    PORT: int = 7070
+    PORT: int = 8000
     PROJECT_NAME: str = "telequiz"
 
     # Database
