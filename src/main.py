@@ -10,11 +10,11 @@ from fastapi import FastAPI, Request, Response, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from database import engine
-from config import settings
-from services import save_user_to_db
-from models import BaseModel
-from routers import (
+from .database import engine
+from .config import settings
+from .services import save_user_to_db
+from .models import BaseModel
+from .routers import (
     user,
     tg
 )
