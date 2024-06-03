@@ -1,5 +1,5 @@
-from .database import SessionLocal
-from .models import User
+from database import SessionLocal
+from models import User
 
 def save_user_to_db(telegram_id: int):
     db = SessionLocal()
