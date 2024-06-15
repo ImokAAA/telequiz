@@ -13,6 +13,7 @@ services:
     image: postgres:latest
     restart: always
     environment:
+      POSTGRES_HOST_AUTH_METHOD: md5
       POSTGRES_DB: telequizdb
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres

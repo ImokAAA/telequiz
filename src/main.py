@@ -2,40 +2,36 @@ import uvicorn
 import logging
 import aiogram
 import asyncio
+from contextlib import asynccontextmanager
 
-from aiogram import Bot, Dispatcher
+from aiogram import Bot, Dispatcher, Router
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, Update
 from fastapi import FastAPI, Request, Response, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from database import engine
+from models.base import engine
 from config import settings
-from services import save_user_to_db
-from models import BaseModel
-from routers import (
-    user,
-    tg
-)
+from src.models import Base, db_helper
+from handlers import routers_list
 
-nrock_ip = "https://imangali.space"
+nrock_ip = "https://bdd3-77-245-106-179.ngrok-free.app"
 WEBHOOK_URL = f"{nrock_ip}/webhook"
 
-BaseModel.metadata.create_all(bind=engine)
 bot = Bot(token=settings.TOKEN)
 dp = Dispatcher()
 
-@dp.message(CommandStart())
-async def cmd_start(message: Message):
-    save_user_to_db(message.from_user.id)
-    await message.answer('Привет. \nЭтот бот может организовать квизы для совместной игры в групповых чатах. Также вы можете создавать собственные квизы. \nНапиши команду /create_quiz для создания квизов.')
-
-@dp.message(Command('help'))
-async def cmd_help(message: Message):
-    await message.answer('help')
-
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await bot.set_webhook(WEBHOOK_URL) 
+    for router in routers_list:
+        dp.include_router(router)
+    async with db_helper.engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield
+    await bot.delete_webhook()
+app = FastAPI(lifespan=lifespan)
 #app.include_router(user.router)
 
 '''
@@ -46,20 +42,12 @@ async def send_welcome(message: Message):
 
 '''
 
-@app.on_event("startup")
-async def on_startup():
-    await bot.set_webhook(WEBHOOK_URL)
-
-@app.on_event("shutdown")
-async def on_shutdown():
-    await bot.delete_webhook()
-
 @app.post("/webhook")
 async def telegram_webhook(request: Request):
     try:
         update = Update.model_validate(await request.json(), context={'bot':bot}) 
         #Dispatcher.set_current(dp)
-        #Bot.set_current(bot)
+        #Bot.set_current(bot) 
         await dp.feed_update(bot, update)
     except Exception as e:
         logging.error(e)

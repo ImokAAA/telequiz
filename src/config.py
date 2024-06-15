@@ -14,16 +14,18 @@ class Settings(BaseSettings):
     DB_NAME: str = "telequizdb"
     DB_USERNAME: str = "postgres"
     DB_PASSWORD: str = "postgres"
-    DB_URL: str = f"postgresql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-    # DB_URL: str = f"sqlite:///./{DB_NAME}.db"
-
+    #DB_URL: str = f"postgresql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    #DB_URL: str = f"postgresql://{DB_USERNAME}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    DB_URL: str = f"sqlite+aiosqlite:///./{DB_NAME}.db"
+    #DB_ECHO: bool = False
+    DB_ECHO: bool = True
     # JWT
     SECRET_KEY: str = "secret"
     ALGORITHM: str = "HS256"
     EXPIRE_MINUTES: int = 1440  # 24 hours
 
     # Telegram Bot
-    TOKEN: str = "6860322040:AAFM-vQ1wCUxRTNK9h36je_x6muxPsv3YEM"
+    TOKEN: str = "7253524799:AAH262DWMzcJOPMwjlVVH6JkCL5Ir0jNWPI"
     
     # Redis
     REDIS_HOST: str = "localhost"
