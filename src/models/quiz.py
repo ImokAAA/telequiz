@@ -10,4 +10,4 @@ class Quiz(Base):
     owner_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
  
     owner = relationship("User", back_populates="quizes")
-    answers = relationship("Answer", back_populates="quiz")
+    questions = relationship("Question", back_populates="quiz")

@@ -4,6 +4,7 @@ from aiogram.filters import CommandStart, Command
 
 from models import get_db
 from src.users.crud import save_user_to_db
+from quizes.crud import get_quiz_by_name
 import keyboards as kb
 router = Router()
 
@@ -21,9 +22,22 @@ async def cmd_help(message: Message):
 async def cmd_menu(message: Message):
     await message.answer('Главное меню', 
                          reply_markup= kb.main)
-    
+
+@router.callback_query(F.data == 'main')
+async def clbk_menu(callback: CallbackQuery):
+    await callback.message.edit_text('Главное меню', 
+                         reply_markup= kb.main
+                        )
+
 @router.callback_query(F.data == 'quizes')
 async def clbk(callback: CallbackQuery):
     await callback.message.edit_text('Список квизов', 
                          reply_markup= await kb.inline_quizes(callback.message.chat.id)
+                        )
+
+@router.callback_query(F.data.startswith("quiz_info_"))
+async def clbk_single(callback: CallbackQuery):
+    quiz_name = callback.data[len('quiz_info_'):]
+    await callback.message.edit_text(f"{quiz_name}", 
+                         reply_markup= await kb.inline_quiz_menu(quiz_name=quiz_name)
                         )

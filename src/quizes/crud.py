@@ -24,7 +24,11 @@ async def get_user_quizes_name(session: AsyncSession, telegram_id: int):
     stmt = select(Quiz).where(Quiz.owner_id==user.id).order_by(Quiz.id)
     result:Result = await session.execute(stmt)
     quizes = result.scalars().all()
-    for quiz in quizes:
-        print(quiz.name)
     quizes_names_only = [str(quiz.name) for quiz in quizes]
     return quizes_names_only
+
+async def get_quiz_by_name(session: AsyncSession, name: str):
+    stmt = select(Quiz).where(Quiz.name==name).order_by(Quiz.id)
+    result:Result = await session.execute(stmt)
+    quiz = result.scalars().first()
+    return quiz

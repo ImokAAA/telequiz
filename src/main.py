@@ -14,10 +14,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from models.base import engine
 from config import settings
 from src.models import Base, db_helper
-from handlers import routers_list
+from commands import routers_list
 
-nrock_ip = "https://bdd3-77-245-106-179.ngrok-free.app"
-WEBHOOK_URL = f"{nrock_ip}/webhook"
+server_ip = "https://bdd3-77-245-106-179.ngrok-free.app"
+WEBHOOK_URL = f"{server_ip}/webhook"
 
 bot = Bot(token=settings.TOKEN)
 dp = Dispatcher()
@@ -46,8 +46,6 @@ async def send_welcome(message: Message):
 async def telegram_webhook(request: Request):
     try:
         update = Update.model_validate(await request.json(), context={'bot':bot}) 
-        #Dispatcher.set_current(dp)
-        #Bot.set_current(bot) 
         await dp.feed_update(bot, update)
     except Exception as e:
         logging.error(e)
