@@ -6,7 +6,6 @@ from aiogram.fsm.context import FSMContext
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
 
-#from models import db_helper
 from models import get_db
 from quizes.crud import save_quiz_to_db
 

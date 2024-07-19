@@ -8,7 +8,7 @@ from fastapi import Depends
 
 from models import get_db
 from src.answers.crud import save_answer_to_db
-from answers.crud import get_answer_by_id
+from src.answers.crud import get_answer_by_id, get_question_answers_name
 import keyboards as kb
 router = Router()
 
@@ -22,8 +22,11 @@ class Answer(StatesGroup):
 async def clb_list_answers(callback: CallbackQuery):
     question_id = callback.data.split("_")[1]
     quiz_name = callback.data.split("_")[2]
+    async for sess in get_db():
+        answer_names = await get_question_answers_name(session=sess, question_id=question_id)
+    
     await callback.message.edit_text('Список ответов', 
-                         reply_markup= await kb.inline_answers(question_id=question_id, quiz_name=quiz_name))
+                         reply_markup= await kb.inline_answers(answer_names=answer_names, question_id=question_id, quiz_name=quiz_name))
 
 @router.callback_query(F.data.startswith("answer_add_"))
 async def cmd_create_answer(callback: CallbackQuery, state: FSMContext):
@@ -47,10 +50,13 @@ async def answer_correct(message: Message, state: FSMContext):
         is_correct = True
     await state.update_data(is_correct = str(is_correct))
     data = await state.get_data()
+    question_id = data['question_id']
     async for sess in get_db():
-        await save_answer_to_db(session = sess, question_id = data['question_id'], answer_name = data['name'], is_correct = is_correct)
+        await save_answer_to_db(session = sess, question_id = question_id, answer_name = data['name'], is_correct = is_correct)
+        answer_names = await get_question_answers_name(session=sess, question_id=question_id)
+    
     await message.answer(f"Ваш ответ {data['name']} был создан", 
-                         reply_markup= await kb.inline_answers(question_id=data['question_id'], quiz_name=data['quiz_name']))
+                         reply_markup= await kb.inline_answers(answer_names=answer_names, question_id=question_id, quiz_name=data['quiz_name']))
     await state.clear()
 
 @router.callback_query(F.data.startswith("answer_correct_"))

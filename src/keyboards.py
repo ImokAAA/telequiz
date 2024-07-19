@@ -1,10 +1,9 @@
+from typing import Iterable
+
 from aiogram.types import (InlineKeyboardButton, InlineKeyboardMarkup)
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from src.quizes.crud import get_user_quizes_name, get_quiz_by_name
-from src.questions.crud import get_quiz_questions, get_question_by_id
-from src.answers.crud import get_question_answers_name, get_answer_by_id
-from src.play.crud import get_answers_by_question_id, get_question_by_quiz_name_and_index
+from src.models import Quiz, Answer, Question, User
 
 from models import get_db
 
@@ -15,49 +14,42 @@ main = InlineKeyboardMarkup(inline_keyboard=[
     ]
 )
 
-async def inline_quizes(telegram_id:int):
+async def inline_quizes(quiz_names: Iterable[str]):
     keyboard = InlineKeyboardBuilder()
-    async for sess in get_db():
-        quizes = await get_user_quizes_name(session=sess, telegram_id=telegram_id)
+    
     keyboard.add(InlineKeyboardButton(text="Назад", \
                                         callback_data=f'main')
                 )
-    for quiz in quizes:
+    for quiz in quiz_names:
         keyboard.add(InlineKeyboardButton(text=quiz, \
                                           callback_data=f'quiz_info_{quiz}')
                      )
     return keyboard.adjust(2).as_markup()
 
-async def inline_quizes_play(telegram_id:int):
+async def inline_quizes_play(quiz_names: Iterable[str]):
     keyboard = InlineKeyboardBuilder()
-    async for sess in get_db():
-        quizes = await get_user_quizes_name(session=sess, telegram_id=telegram_id)
     keyboard.add(InlineKeyboardButton(text="Назад", \
                                         callback_data=f'main')
                 )
-    for quiz in quizes:
+    for quiz in quiz_names:
         keyboard.add(InlineKeyboardButton(text=quiz, \
                                           callback_data=f'quiz_play_{quiz}')
                      )
     return keyboard.adjust(2).as_markup()
 
-async def inline_quizes_play_question(question_id:int):
+async def inline_quizes_play_question(answers:Iterable[Answer]):
     keyboard = InlineKeyboardBuilder()
-    async for sess in get_db():
-        answers = await get_answers_by_question_id(session= sess, question_id=question_id)
     keyboard.add(InlineKeyboardButton(text="Выйти", \
                                         callback_data=f'main')
                 )
     for answer in answers:
         keyboard.add(InlineKeyboardButton(text=answer.name, \
-                                          callback_data=f'answer_check_{answer.id}_{question_id}')
+                                          callback_data=f'answer_check_{answer.id}_{answer.question_id}')
                      )
     return keyboard.adjust(2).as_markup()
 
-async def inline_quizes_play_question_result(question_id:int, answer_id:int):
+async def inline_quizes_play_question_result(answers:Iterable[Answer], answer_id:int, question_id:int):
     keyboard = InlineKeyboardBuilder()
-    async for sess in get_db():
-        answers = await get_answers_by_question_id(session= sess, question_id=question_id)
     keyboard.add(InlineKeyboardButton(text="Выйти", \
                                         callback_data=f'main')
                 )
@@ -70,10 +62,8 @@ async def inline_quizes_play_question_result(question_id:int, answer_id:int):
                      )
     return keyboard.adjust(2).as_markup()
 
-async def inline_quiz_menu(quiz_name:str):
+async def inline_quiz_menu(quiz:Quiz):
     keyboard = InlineKeyboardBuilder()
-    async for sess in get_db():
-        quiz = await get_quiz_by_name(session=sess, name=quiz_name)
     
     keyboard.add(InlineKeyboardButton(text="Вопросы", \
                                           callback_data=f'questions_{quiz.name}')
@@ -89,11 +79,8 @@ async def inline_quiz_menu(quiz_name:str):
                 )
     return keyboard.adjust(2).as_markup()
 
-async def inline_questions(quiz_name:str):
+async def inline_questions(questions: Iterable[Question], quiz_name:str):
     keyboard = InlineKeyboardBuilder()
-    async for sess in get_db():
-        questions = await get_quiz_questions(session=sess, quiz_name=quiz_name)
-    
     keyboard.add(InlineKeyboardButton(text="Добавить вопрос", \
                                           callback_data=f'question_add_{quiz_name}')
                 )
@@ -106,11 +93,8 @@ async def inline_questions(quiz_name:str):
                      )
     return keyboard.adjust(2).as_markup()
 
-async def inline_question_menu(question_id:int, quiz_name:str):
+async def inline_question_menu(question:Question, quiz_name:str):
     keyboard = InlineKeyboardBuilder()
-    async for sess in get_db():
-        question = await get_question_by_id(session=sess, id=question_id)
-    
     keyboard.add(InlineKeyboardButton(text="Ответы", \
                                           callback_data=f'answers_{question.id}_{quiz_name}')
                 )
@@ -125,11 +109,8 @@ async def inline_question_menu(question_id:int, quiz_name:str):
                 )
     return keyboard.adjust(2).as_markup()
 
-async def inline_answers(question_id:int, quiz_name:str):
+async def inline_answers(answer_names:Iterable[str], question_id:int, quiz_name:str):
     keyboard = InlineKeyboardBuilder()
-    async for sess in get_db():
-        answers = await get_question_answers_name(session=sess, question_id=question_id)
-    
     keyboard.add(InlineKeyboardButton(text="Добавить ответ", \
                                           callback_data=f'answer_add_{question_id}_{quiz_name}')
                 )
@@ -139,7 +120,7 @@ async def inline_answers(question_id:int, quiz_name:str):
     keyboard.add(InlineKeyboardButton(text="<Назад", \
                                           callback_data=f'question_info_{question_id}_{quiz_name}')
                 )
-    for answer in answers:
+    for answer in answer_names:
         keyboard.add(InlineKeyboardButton(text=answer, \
                                           callback_data=f'answer_info_{answer}')
                      )

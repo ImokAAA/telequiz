@@ -32,15 +32,6 @@ async def lifespan(app: FastAPI):
     yield
     await bot.delete_webhook()
 app = FastAPI(lifespan=lifespan)
-#app.include_router(user.router)
-
-'''
-@dp.message_handler(commands=['start'])
-async def send_welcome(message: Message):
-    save_user_to_db(message.from_user.id)
-    await message.reply("Hello World")
-
-'''
 
 @app.post("/webhook")
 async def telegram_webhook(request: Request):
